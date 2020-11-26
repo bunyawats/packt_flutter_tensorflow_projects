@@ -31,16 +31,20 @@ class _FaceDetectorHomeState extends State<FaceDetectorHome> {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: 8.0,
-        vertical: 16.0,
+        vertical: 4.0,
       ),
-      child: RaisedButton(
-        color: Colors.blue,
-        textColor: Colors.white,
-        splashColor: Colors.blueGrey,
-        onPressed: () {
-          onPickImageSelected(imgSource);
-        },
-        child: Text(imgSource),
+      child: ButtonTheme(
+        minWidth: 200.0,
+        height: 50.0,
+        child: RaisedButton(
+          color: Colors.blue,
+          textColor: Colors.white,
+          splashColor: Colors.blueGrey,
+          onPressed: () {
+            onPickImageSelected(imgSource);
+          },
+          child: Text(imgSource),
+        ),
       ),
     );
   }
