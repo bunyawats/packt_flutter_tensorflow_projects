@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
@@ -28,8 +27,8 @@ class _FaceDetectionState extends State<FaceDetection> {
     );
     List<Face> detectedFaces = await faceDetector.processImage(visionImage);
     for (var i = 0; i < detectedFaces.length; i++) {
-      final double smileProability = detectedFaces[i].smilingProbability;
-      print('Smiling: $smileProability');
+      final double smileProbability = detectedFaces[i].smilingProbability;
+      print('Smiling: $smileProbability');
     }
     faces = detectedFaces;
     loadImage(widget.file);
@@ -93,14 +92,44 @@ class FacePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    canvas.drawImage(image, Offset.zero, Paint());
+
+    for (var i = 0; i < faces.length; i++) {
+      bool isSmiling = faces[i].smilingProbability > 0.80;
+      drawSmilingTag(isSmiling, rects[i], canvas);
+    }
+  }
+
+  void drawSmilingTag(bool isSmiling, Rect rect, Canvas canvas) {
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8.0
-      ..color = Colors.red;
-    canvas.drawImage(image, Offset.zero, Paint());
-    for (var i = 0; i < faces.length; i++) {
-      canvas.drawRect(rects[i], paint);
-    }
+      ..color = isSmiling ? Colors.green : Colors.red;
+    canvas.drawRect(rect, paint);
+
+    final textSpan = TextSpan(
+      style: TextStyle(
+        color: Colors.lightGreen,
+        fontWeight: FontWeight.w900,
+        fontSize: 100,
+      ),
+      text: isSmiling ? 'Smiling' : '',
+    );
+
+    Offset position = Offset(
+      rect.bottomLeft.dx + 10,
+      rect.bottomLeft.dy - 110,
+    );
+
+    TextPainter tp = TextPainter(
+      text: textSpan,
+      textDirection: TextDirection.ltr,
+    );
+    tp.layout();
+    tp.paint(
+      canvas,
+      position,
+    );
   }
 
   @override
