@@ -34,8 +34,8 @@ class _FaceDetectorHomeState extends State<FaceDetectorHome> {
         vertical: 4.0,
       ),
       child: ButtonTheme(
-        minWidth: 200.0,
-        height: 50.0,
+        // minWidth: 200.0,
+        // height: 50.0,
         child: RaisedButton(
           color: Colors.blue,
           textColor: Colors.white,
@@ -77,7 +77,7 @@ class _FaceDetectorHomeState extends State<FaceDetectorHome> {
       Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FaceDetectorDetail(file),
+            builder: (context) => FaceDetection(file),
           ));
     } catch (ex) {
       scaffold.showSnackBar(
