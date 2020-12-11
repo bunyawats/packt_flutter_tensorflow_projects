@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
+import 'package:flutter_dialogflow/dialogflow_v2.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -21,11 +22,21 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  _handleSubmitted(String query) {
+  _handleSubmitted(String query) async {
     _textController.clear();
+
+    AuthGoogle authGoogle =
+        await AuthGoogle(fileJson: 'assets/gcp-api.json').build();
+    Dialogflow dialogflow = Dialogflow(
+      authGoogle: authGoogle,
+      language: Language.english,
+    );
+    AIResponse aiResponse = await dialogflow.detectIntent(query);
+    String rsp = aiResponse.getMessage();
+
     ChatMessage message = ChatMessage(
       query: query,
-      response: 'This is the response string',
+      response: rsp,
     );
     setState(() {
       _messages.insert(0, message);
