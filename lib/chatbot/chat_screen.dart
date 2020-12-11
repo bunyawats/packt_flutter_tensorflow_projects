@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
 import 'package:flutter_dialogflow/dialogflow_v2.dart';
+import 'package:permission/permission.dart';
+import 'package:flutter_speech/flutter_speech.dart';
 
 class ChatScreen extends StatefulWidget {
   @override
@@ -11,6 +14,89 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final List<ChatMessage> _messages = <ChatMessage>[];
+
+  SpeechRecognition _speech;
+
+  bool _isAvailable = false;
+  bool _isListening = false;
+  String transcription = '';
+
+  void activateSpeechRecognizer() {
+    _speech = new SpeechRecognition();
+    _speech.setAvailabilityHandler(onSpeechAvailability);
+    _speech.setRecognitionStartedHandler(onRecognitionStarted);
+    _speech.setRecognitionResultHandler(onRecognitionResult);
+    _speech.setRecognitionCompleteHandler(onRecognitionComplete);
+    _speech.setErrorHandler(errorHandler);
+    _speech.activate('en_US').then((res) {
+      setState(() => _isAvailable = res);
+    });
+
+    print(' activateSpeechRecognizer ');
+  }
+
+  void start() {
+    print('on presses mic start');
+    if (_isAvailable && !_isListening) {
+      _speech.activate('en_US').then((_) {
+        return _speech.listen().then((result) {
+          print('_ChatScreenState.start => result $result');
+          setState(() {
+            _isListening = result;
+          });
+        });
+      });
+    }
+  }
+
+  void cancel() =>
+      _speech.cancel().then((_) => setState(() => _isListening = false));
+
+  void stop() => _speech.stop().then((_) {
+        setState(() => _isListening = false);
+      });
+
+  void onSpeechAvailability(bool result) =>
+      setState(() => _isAvailable = result);
+
+  void onRecognitionStarted() {
+    setState(() => _isListening = true);
+  }
+
+  void onRecognitionResult(String text) {
+    print('_ChatScreenState.onRecognitionResult... $text');
+    setState(() => _handleSubmitted(text));
+  }
+
+  void onRecognitionComplete(String text) {
+    print('_ChatScreenState.onRecognitionComplete... $text');
+    setState(() => _isListening = false);
+  }
+
+  void errorHandler() => activateSpeechRecognizer();
+
+  @override
+  void initState() {
+    super.initState();
+    activateSpeechRecognizer();
+    requestPermission();
+  }
+
+  void requestPermission() async {
+    final res =
+        await Permission.requestPermissions([PermissionName.Microphone]);
+    print(res);
+  }
+
+  Widget createMicButton() {
+    return new Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      child: new IconButton(
+        icon: new Icon(Icons.mic),
+        onPressed: start,
+      ),
+    );
+  }
 
   Widget createTextField() {
     return Flexible(
@@ -23,6 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   _handleSubmitted(String query) async {
+    // query = 'Hi Pun Kung';
     _textController.clear();
 
     AuthGoogle authGoogle =
@@ -61,6 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: <Widget>[
             createTextField(),
             createSendButton(),
+            createMicButton(),
           ],
         ),
       ),
