@@ -23,3 +23,6 @@ doc/api/
 *.js.deps
 *.js.map
 .DS_Store
+lib/plant_species/api_key.dart
+ios/.DS_Store
+#assets/gcp-api.json
