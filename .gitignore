@@ -25,4 +25,4 @@ doc/api/
 .DS_Store
 lib/plant_species/api_key.dart
 ios/.DS_Store
-#assets/gcp-api.json
+assets/gcp-api.json
