@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "166668848294",
+    "project_id": "flutter-ml-api",
+    "storage_bucket": "flutter-ml-api.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:166668848294:android:xxxxxxxxxxxxx",
+        "android_client_info": {
+          "package_name": "com.example.packt_flutter_tensorflow_projects"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "166668848294:android:xxxxxxxxxxxxx.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWqZGpKxxxxxxxxxxxxxxxxxxxx"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "166668848294:android:xxxxxxxxxxxxx.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
