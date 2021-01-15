@@ -19,73 +19,14 @@ class PlantSpeciesRecognition extends StatefulWidget {
 }
 
 class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
-  List<Widget> stackChildren = [];
   File _image;
   bool _busy = false;
-  List _recognitions;
-  String str;
+  List _recognitions = [];
+  String str = "";
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> stackChildren = [];
-    Size size = MediaQuery.of(context).size;
-
-    stackChildren.clear();
-
-    stackChildren.add(
-      Positioned(
-        top: 0,
-        left: 0,
-        width: size.width,
-        child: _image == null ? Text('No Image Selected') : Image.file(_image),
-      ),
-    );
-    stackChildren.add(
-      Center(
-        child: Column(
-          children: <Widget>[
-            str != null
-                ? new Text(
-                    str,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      background: Paint()..color = Colors.white,
-                    ),
-                  )
-                : new Text('No Results'),
-          ],
-        ),
-      ),
-    );
-    stackChildren.add(
-      Center(
-        child: Column(
-          children: _recognitions != null
-              ? _recognitions.map((res) {
-                  var key = res["label"];
-                  var value = res["confidence"].toStringAsFixed(3);
-                  return Text(
-                    "$key: $value",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      background: Paint()..color = Colors.white,
-                    ),
-                  );
-                }).toList()
-              : [],
-        ),
-      ),
-    );
-
-    if (_busy) {
-      stackChildren.add(const Opacity(
-        child: ModalBarrier(dismissible: false, color: Colors.grey),
-        opacity: 0.3,
-      ));
-      stackChildren.add(const Center(child: CircularProgressIndicator()));
-    }
+    List<Widget> stackChildren = buildStackChildren(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -102,33 +43,95 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
     );
   }
 
+  List<Widget> buildStackChildren(BuildContext context) {
+    List<Widget> stackChildren = [];
+    Size size = MediaQuery.of(context).size;
+
+    stackChildren.add(
+      Positioned(
+        top: 0,
+        left: 0,
+        width: size.width,
+        child: _image == null ? Text('No Image Selected') : Image.file(_image),
+      ),
+    );
+    stackChildren.add(
+      Center(
+        child: Column(
+          children: <Widget>[
+            str.isNotEmpty
+                ? new Text(
+                    str,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      background: Paint()..color = Colors.white,
+                    ),
+                  )
+                : new Text('No Results'),
+          ],
+        ),
+      ),
+    );
+    stackChildren.add(
+      Center(
+        child: Column(
+          children: _recognitions.map(
+            (res) {
+              var key = res["label"];
+              var value = res["confidence"].toStringAsFixed(3);
+              return Text(
+                "$key: $value",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  background: Paint()..color = Colors.white,
+                ),
+              );
+            },
+          ).toList(),
+        ),
+      ),
+    );
+
+    if (_busy) {
+      stackChildren.add(const Opacity(
+        child: ModalBarrier(dismissible: false, color: Colors.grey),
+        opacity: 0.3,
+      ));
+      stackChildren.add(const Center(child: CircularProgressIndicator()));
+    }
+    return stackChildren;
+  }
+
   void chooseImageGallery() async {
-    PickedFile pickedImage  = await ImagePicker().getImage(
+    PickedFile pickedImage = await ImagePicker().getImage(
       source: ImageSource.gallery,
       imageQuality: 50,
     );
-    print('select image $_image');
-    if (pickedImage == null) return;
-    _image = File(pickedImage.path);
+    print('select image $pickedImage');
+
+    var image = File(pickedImage.path);
     setState(() {
+      _image = image;
       _busy = true;
     });
 
     //Deciding on which method should be chosen image analysis
     if (widget.modelType == 0) {
       print("call visionAPICall");
-      await visionAPICall();
+      await visionAPICall(image);
     } else if (widget.modelType == 1) {
       print("call analyzeTFLite");
-      await analyzeTFLite();
+      await analyzeTFLite(image);
     }
     setState(() {
       _busy = false;
     });
   }
 
-  Future visionAPICall() async {
-    List<int> imageBytes = _image.readAsBytesSync();
+  Future visionAPICall(File image) async {
+    List<int> imageBytes = image.readAsBytesSync();
     print(imageBytes);
     String base64Image = base64Encode(imageBytes);
     var requestStr = {
@@ -158,19 +161,25 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
     str = '$key : $value';
   }
 
-  Future analyzeTFLite() async {
+  Future analyzeTFLite(File image) async {
+    Tflite.close();
     String res = await Tflite.loadModel(
       model: "assets/model.tflite",
       labels: "assets/labels.txt",
     );
     print('Model Loaded: $res');
 
-    var recognitions = await Tflite.runModelOnImage(
-      path: _image.path,
+    final recognitions = await Tflite.runModelOnImage(
+      path: image.path,
     );
     setState(() {
       _recognitions = recognitions;
     });
     print('Recognition Result: $_recognitions');
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
