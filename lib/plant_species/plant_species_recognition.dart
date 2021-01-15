@@ -4,12 +4,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:tflite/tflite.dart';
+
 import 'api_key.dart';
 
 class PlantSpeciesRecognition extends StatefulWidget {
-  int chosenModel;
+  int modelType;
 
-  PlantSpeciesRecognition(this.chosenModel);
+  PlantSpeciesRecognition(this.modelType);
 
   @override
   _PlantSpeciesRecognitionState createState() =>
@@ -19,12 +21,17 @@ class PlantSpeciesRecognition extends StatefulWidget {
 class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
   List<Widget> stackChildren = [];
   File _image;
-  // bool _busy = false;
+  bool _busy = false;
+  List _recognitions;
+  String str;
 
   @override
   Widget build(BuildContext context) {
     List<Widget> stackChildren = [];
     Size size = MediaQuery.of(context).size;
+
+    stackChildren.clear();
+
     stackChildren.add(
       Positioned(
         top: 0,
@@ -33,6 +40,52 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
         child: _image == null ? Text('No Image Selected') : Image.file(_image),
       ),
     );
+    stackChildren.add(
+      Center(
+        child: Column(
+          children: <Widget>[
+            str != null
+                ? new Text(
+                    str,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      background: Paint()..color = Colors.white,
+                    ),
+                  )
+                : new Text('No Results'),
+          ],
+        ),
+      ),
+    );
+    stackChildren.add(
+      Center(
+        child: Column(
+          children: _recognitions != null
+              ? _recognitions.map((res) {
+                  var key = res["label"];
+                  var value = res["confidence"].toStringAsFixed(3);
+                  return Text(
+                    "$key: $value",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      background: Paint()..color = Colors.white,
+                    ),
+                  );
+                }).toList()
+              : [],
+        ),
+      ),
+    );
+
+    if (_busy) {
+      stackChildren.add(const Opacity(
+        child: ModalBarrier(dismissible: false, color: Colors.grey),
+        opacity: 0.3,
+      ));
+      stackChildren.add(const Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -50,11 +103,27 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
   }
 
   void chooseImageGallery() async {
-    _image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    PickedFile pickedImage  = await ImagePicker().getImage(
+      source: ImageSource.gallery,
+      imageQuality: 50,
+    );
     print('select image $_image');
-    // if (_image == null) return;
+    if (pickedImage == null) return;
+    _image = File(pickedImage.path);
     setState(() {
-      _image = _image;
+      _busy = true;
+    });
+
+    //Deciding on which method should be chosen image analysis
+    if (widget.modelType == 0) {
+      print("call visionAPICall");
+      await visionAPICall();
+    } else if (widget.modelType == 1) {
+      print("call analyzeTFLite");
+      await analyzeTFLite();
+    }
+    setState(() {
+      _busy = false;
     });
   }
 
@@ -82,8 +151,26 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
     print('Respons body: ${response.body}');
 
     var responseJson = json.decode(response.body);
-    var key = responseJson["response"][0]["labelAnnotations"][0]["description"];
-    var value = responseJson["responses"][0]["labelAnnotations"][0]["score"].toStringAsFixed(3);
-    var str = '$key : $value';
+    var key =
+        responseJson["responses"][0]["labelAnnotations"][0]["description"];
+    var value = responseJson["responses"][0]["labelAnnotations"][0]["score"]
+        .toStringAsFixed(3);
+    str = '$key : $value';
+  }
+
+  Future analyzeTFLite() async {
+    String res = await Tflite.loadModel(
+      model: "assets/model.tflite",
+      labels: "assets/labels.txt",
+    );
+    print('Model Loaded: $res');
+
+    var recognitions = await Tflite.runModelOnImage(
+      path: _image.path,
+    );
+    setState(() {
+      _recognitions = recognitions;
+    });
+    print('Recognition Result: $_recognitions');
   }
 }

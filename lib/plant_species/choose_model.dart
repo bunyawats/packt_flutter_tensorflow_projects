@@ -7,8 +7,8 @@ class ChooseModel extends StatefulWidget {
 }
 
 class _ChooseModelState extends State<ChooseModel> {
-  var str_cloud = 'Cloud Vision API';
-  var str_tensor = 'TensorFlow Lite';
+  var strCloud = 'Cloud Vision API';
+  var strTensor = 'TensorFlow Lite';
 
   Widget buildRowTitle(BuildContext context, String title) {
     return Center(
@@ -33,7 +33,7 @@ class _ChooseModelState extends State<ChooseModel> {
       splashColor: Colors.blueGrey,
       child: Text(choseModel),
       onPressed: () {
-        var modelType = (choseModel == str_cloud) ? 0 : 1;
+        var modelType = (choseModel == strCloud) ? 0 : 1;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -56,8 +56,8 @@ class _ChooseModelState extends State<ChooseModel> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             buildRowTitle(context, 'Choose Model'),
-            createButton(str_cloud),
-            createButton(str_tensor),
+            createButton(strCloud),
+            createButton(strTensor),
           ],
         ),
       ),

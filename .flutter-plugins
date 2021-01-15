@@ -4,5 +4,6 @@ firebase_core_web=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/firebas
 firebase_ml_vision=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/firebase_ml_vision-0.9.10/
 flutter_plugin_android_lifecycle=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/flutter_plugin_android_lifecycle-1.0.11/
 flutter_speech=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/flutter_speech-1.1.0/
-image_picker=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/image_picker-0.6.7+17/
+image_picker=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/image_picker-0.6.7+21/
 permission=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/permission-0.1.7/
+tflite=/Users/bunyawat.sin/.pub-cache/hosted/pub.dartlang.org/tflite-0.0.5/
