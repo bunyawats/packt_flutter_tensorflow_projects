@@ -9,7 +9,7 @@ import 'package:tflite/tflite.dart';
 import 'api_key.dart';
 
 class PlantSpeciesRecognition extends StatefulWidget {
-  int modelType;
+  final int modelType;
 
   PlantSpeciesRecognition(this.modelType);
 
@@ -131,7 +131,7 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
     List<int> imageBytes = _image.readAsBytesSync();
     print(imageBytes);
     String base64Image = base64Encode(imageBytes);
-    var request_str = {
+    var requestStr = {
       "requests": [
         {
           "image": {"content": "$base64Image"},
@@ -145,7 +145,7 @@ class _PlantSpeciesRecognitionState extends State<PlantSpeciesRecognition> {
 
     var response = await http.post(
       url,
-      body: json.encode(request_str),
+      body: json.encode(requestStr),
     );
     print('Response status: ${response.statusCode}');
     print('Respons body: ${response.body}');

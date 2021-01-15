@@ -27,3 +27,4 @@ lib/plant_species/api_key.dart
 ios/.DS_Store
 assets/gcp-api.json
 android/app/google-services.json
+.flutter-plugins-dependencies

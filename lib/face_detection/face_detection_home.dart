@@ -66,11 +66,13 @@ class _FaceDetectorHomeState extends State<FaceDetectorHome> {
     } else {
       imageSource = ImageSource.gallery;
     }
-    final scaffold = _scaffoldKey.currentState;
+
     try {
-      final file = await ImagePicker.pickImage(
+      PickedFile pickedImage  = await ImagePicker().getImage(
         source: imageSource,
+        imageQuality: 50,
       );
+      final file = File(pickedImage.path);
       if (file == null) {
         throw Exception('File is not available');
       }
@@ -80,7 +82,7 @@ class _FaceDetectorHomeState extends State<FaceDetectorHome> {
             builder: (context) => FaceDetection(file),
           ));
     } catch (ex) {
-      scaffold.showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(ex.toString()),
         ),
